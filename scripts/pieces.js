@@ -165,5 +165,7 @@ var IPiece = [
     ]
 ];
 
-var pieces = [IPiece, JPiece, LPiece, OPiece, SPiece, TPiece, ZPiece];
-var colors = ["blank", "light-blue", "blue", "orange", "yellow", "green", "purple", "red"];
+
+
+var pieces = [TPiece, JPiece, ZPiece, OPiece, SPiece, LPiece, IPiece];
+var colors = ["blank", "purple", "blue", "red", "yellow", "green", "orange", "light-blue"];

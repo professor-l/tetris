@@ -1,0 +1,52 @@
+#game-table {
+    border-collapse: collapse;
+    border-radius: 1px;
+    background-color: #212121;
+    border-radius: 4px;
+}
+
+#game-table-body {
+    border: 2px solid transparent;
+}
+
+#game-table td {
+    box-sizing: border-box;
+    display: inline-block;
+    margin: 3px;
+    width: 25px;
+    height: 25px;
+    border-radius: 2px;
+    border: 2px solid transparent;
+}
+
+#game-table td.blank {
+    background-color: #424242;
+}
+
+#game-table td.red {
+    background-color: #ef5350;
+}
+
+#game-table td.orange {
+    background-color: #FB8C00;
+}
+
+#game-table td.yellow {
+    background-color: #FFEE58;
+}
+
+#game-table td.green {
+    background-color: #66BB6A;
+}
+
+#game-table td.blue {
+    background-color: #5C6BC0;
+}
+
+#game-table td.purple {
+    background-color: #AB47BC;
+}
+
+#game-table td.light-blue {
+    background-color: #29B6F6;
+}
