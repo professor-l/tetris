@@ -115,9 +115,17 @@ function Game() {
     this.board = [];
     
     this.currentPiece;
+    this.ghost;
+    this.ghostBool = true;
     
     // Previous board, used to minimize updates of DOM
     this.previousBoard = [];
+    
+    this.updatePreviousBoard = function() {
+        for (var i = 10; i < 40; i++) {
+            this.previousBoard[i] = this.board[i].slice();
+        }
+    }
 
     
 
@@ -130,13 +138,6 @@ function Game() {
     this.resetBoards();
     
     
-    
-    
-    this.updatePreviousBoard = function() {
-        for (var i = 10; i < 40; i++) {
-            this.previousBoard[i] = this.board[i].slice();
-        }
-    }
     
     // Draw and Update - DOM functions
     this.draw = function() {
@@ -265,8 +266,12 @@ function Game() {
     }
     
     this.removeCurrentPiece = function() {
-        for (var i = 0; i < this.currentPiece.referenceArray[0].length; i++) {
-            for (var j = 0; j < this.currentPiece.referenceArray[0][0].length; j++) {
+        for (var i = 0; 
+             i < this.currentPiece.referenceArray[0].length; 
+             i++) {
+            for (var j = 0; 
+                 j < this.currentPiece.referenceArray[0][0].length; 
+                 j++) {
                 
                 var piece = this.currentPiece.referenceArray
                             [this.currentPiece.rotationIndex];
@@ -284,19 +289,22 @@ function Game() {
     
     
     // Actual manipulation functions
-    this.spawnNewPiece = function() {
-        this.getNewPiece();
+    this.spawnNewPiece = function(p) {
+        console.log("a");
+        this.holdBool = false;
+        
+        if (!p) { this.getNewPiece(); }
+        else { this.currentPiece = p; }
         
         var spawni = 18;
-        
         var spawnj = 5 - Math.floor(
             (this.currentPiece.referenceArray[0][0].length + 1) / 2);
-        
         this.currentPiece.coordinates = [spawni, spawnj];
         
         var successful = this.attemptPlacement(this.currentPiece);
-        
         this.moveDown();
+        
+        if (this.ghostBool) { this.updateGhost(); }
         
         return successful;
     }
@@ -340,8 +348,13 @@ function Game() {
         
         if (successful) { this.currentPiece = toRotate; }
         
-        // Redraw potentially redefined currentPiece
-        this.attemptPlacement(this.currentPiece);
+        // Redraw currentPiece if it wasn't redrawn
+        else { this.attemptPlacement(this.currentPiece); }
+        
+        if (this.ghostBool) {
+            this.eraseGhost();
+            this.updateGhost();
+        }
         
         return successful;
     }
@@ -352,7 +365,14 @@ function Game() {
         
         this.currentPiece.coordinates[1] += (s == 'l' ? -1 : 1);
         var successful = this.attemptPlacement(this.currentPiece);
-        if (successful) { return true; }
+        
+        if (successful) {
+            if (this.ghostBool) {
+                this.eraseGhost();
+                this.updateGhost();
+            }
+            return true;
+        }
     
         this.currentPiece.coordinates[1] -= (s == 'l' ? -1 : 1);    
         this.attemptPlacement(this.currentPiece);
@@ -361,8 +381,6 @@ function Game() {
     }
     
     this.moveDown = function() {
-        
-        this.removeCurrentPiece();
         
         this.removeCurrentPiece();
         
@@ -376,6 +394,116 @@ function Game() {
         
     }
     
+    
+    
+    // Clearing lines
+    this.checkLineClears = function() {
+        
+        var clearRows = [];
+        
+        for (var i = 0; i < 40; i++) {
+            
+            var clear = true;
+            
+            for (var j = 0; j < 10; j++) {
+                if (this.board[i][j] < 1 || this.board[i][j] > 7) {
+                    clear = false;
+                    break;
+                }
+            }
+            
+            if (clear) {
+                clearRows.push(i);
+            }
+            
+        }
+        return clearRows;
+    }
+    
+    this.clearLines = function(a) {
+        for (var i = 0; i < a.length; i++) {
+            
+            for (var j = a[i]; j > 0; j--) {
+                this.board[j] = this.board[j - 1].slice();
+            }
+            
+            G.board[0] = [0,0,0,0,0,0,0,0,0,0];
+        }
+    }
+    
+    
+    
+    // Manipulation of ghost piece
+    this.updateGhost = function() {
+        var toGhost = duplicatePiece(this.currentPiece);
+        
+        while (this.moveDown());
+        
+        this.ghost = duplicatePiece(this.currentPiece);
+        this.removeCurrentPiece();
+        
+        var draw = this.ghost.referenceArray[this.ghost.rotationIndex];
+        
+        for (var i = 0; i < draw.length; i++) {
+            for (var j = 0; j < draw[i].length; j++) {
+                if (draw[i][j] != 0) {
+                    var boardi = this.ghost.coordinates[0] + i;
+                    var boardj = this.ghost.coordinates[1] + j;
+                    this.board[boardi][boardj] = 15 - draw[i][j];
+                }
+            }
+        }
+        
+        this.currentPiece = toGhost;
+        this.attemptPlacement(this.currentPiece);
+        
+    }
+    
+    this.eraseGhost = function() {
+        var erase = this.ghost.referenceArray[this.ghost.rotationIndex];
+        
+        for (var i = 0; i < erase.length; i++) {
+            for (var j = 0; j < erase[i].length; j++) {
+                if (erase[i][j] != 0) {
+                    var boardi = this.ghost.coordinates[0] + i;
+                    var boardj = this.ghost.coordinates[1] + j;
+                    if (this.board[boardi][boardj] > 7) {
+                        this.board[boardi][boardj] = 0;
+                    }
+                }
+            }
+        }
+    }
+    
+    
+    
+    // Hold piece
+    this.holdPiece = -1;
+    this.holdBool = false;
+    
+    this.hold = function() {
+        
+        if (this.holdBool) { return false; }
+        
+        this.removeCurrentPiece();
+        this.eraseGhost();
+        
+        var prevHold = this.holdPiece;
+        this.holdPiece = pieces.indexOf(this.currentPiece.referenceArray);
+        
+        if (prevHold == -1) {
+            var t = this.spawnNewPiece();
+            this.holdBool = true;
+            return t;
+        }
+        
+        this.currentPiece = new Piece(prevHold);
+        var t = this.spawnNewPiece(this.currentPiece);
+        
+        this.holdBool = true;
+        
+        return t;
+    }
 }
 
 var G = new Game();
