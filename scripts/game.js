@@ -130,6 +130,8 @@ function Game() {
     
 
     this.resetBoards = function() {
+        this.board = [];
+        this.previousBoard = [];
         for (var i = 0; i < 40; i++) {
             this.board.push([0,0,0,0,0,0,0,0,0,0]);
             this.previousBoard.push([0,0,0,0,0,0,0,0,0,0]);
@@ -290,7 +292,6 @@ function Game() {
     
     // Actual manipulation functions
     this.spawnNewPiece = function(p) {
-        console.log("a");
         this.holdBool = false;
         
         if (!p) { this.getNewPiece(); }

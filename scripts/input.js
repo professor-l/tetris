@@ -67,22 +67,17 @@ function keyDownFunction(e) {
     }
     
     else if (c == KeyCodes.hardDrop && Compressed.hardDrop == false) {
-        clearInterval(gameLoop);
-        
         juggling = false;
         Compressed.hardDrop = true;
         
         while (G.moveDown());
-        
         G.clearLines(G.checkLineClears());
         
         if (!G.spawnNewPiece()) {
             endGame();
         }
-        
+        ModValues.gravity = frameCount % Speeds.gravity;
         updateNextPieceDisplay();
-        
-        setInterval(gameLoop, 1000/60);
     }
     
     else if (c == KeyCodes.rotateCW && Compressed.rotateCW == false) {
@@ -103,6 +98,8 @@ function keyDownFunction(e) {
         updateHoldPieceDisplay();
     }
 }
+
+document.onkeydown = keyDownFunction;
 
 
 
@@ -137,6 +134,8 @@ function keyUpFunction(e) {
         Compressed.hold = false;
     }
 }
+
+document.onkeyup = keyUpFunction;
 
 function gameLoop() {
     frameCount++;
@@ -196,21 +195,79 @@ function gameLoop() {
 
 
 function startGame() {
+    clearInterval(gameInterval);
+    
+    G.resetBoards();
+    
+    G.draw();
+    G.update();
+    
     G.spawnNewPiece();
     updateNextPieceDisplay();
-    gameInterval = setInterval(gameLoop, 1000/60);
+    gameInterval = setInterval(gameLoop, 1000 / 60);
     
-    document.onkeydown = keyDownFunction;
-    document.onkeyup = keyUpFunction;
+    document.getElementById("start-button").blur();
+    
+    document.getElementById("start-button").disabled = true;
+    document.getElementById("pause-button").disabled = false;
+    document.getElementById("reset-button").disabled = false;
 }
 
 function endGame() {
-    document.onkeydown = null;
-    document.onkeyup = null;
-    
     clearInterval(gameInterval);
+    alert("Game over!");
+    
+    document.getElementById("start-button").disabled = false;
+}
+
+function togglePause() {
+    document.getElementById("pause-button").blur();
+    if (gameInterval == undefined) {
+        gameInterval = setInterval(gameLoop, 1000 / 60);
+        document.onkeydown = keyDownFunction;
+        document.getElementById("pause-button").innerHTML = "PAUSE";
+    }
+    else {
+        clearInterval(gameInterval);
+        gameInterval = undefined; 
+        document.onkeydown = null;
+        document.getElementById("pause-button").innerHTML = "RESUME";
+    }
+}
+
+function resetGame() {
+    document.getElementById("reset-button").blur();
+    clearInterval(gameInterval);
+    gameInterval = undefined;
+    document.getElementById("pause-button").innerHTML = "PAUSE";
+    document.getElementById("pause-button").disabled = true;
+    document.getElementById("reset-button").disabled = true;
+    document.getElementById("start-button").disabled = false;
+    
+    G.resetBoards();
+    G.draw();
+    G.update();
+    
+    var next = document.getElementById("next-table-body");
+    while (next.firstElementChild) {
+        next.removeChild(next.firstElementChild);
+    }
+    
+    var hold = document.getElementById("hold-table-body");
+    while (hold.firstElementChild) {
+        hold.removeChild(hold.firstElementChild);
+    }
+    
+    next.appendChild(document.createElement("tr"));
+    next.appendChild(document.createElement("tr"));
+    hold.appendChild(document.createElement("tr"));
+    hold.appendChild(document.createElement("tr"));
 }
 
 
 
 document.getElementById("start-button").onclick = startGame;
+
+document.getElementById("pause-button").onclick = togglePause;
+
+document.getElementById("reset-button").onclick = resetGame;

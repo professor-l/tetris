@@ -52,7 +52,7 @@ button {
     box-shadow: 0px 2px 3px #9E9E9E;
     margin: 20px;
     
-    transition: box-shadow .2s ease;
+    transition: all .2s ease;
 }
 
 button:focus {
@@ -76,11 +76,16 @@ button:active {
 button.orange {
     background-color: #FFA726;
 }
-
+button.orange:hover, button.orange:disabled {
+    background-color: #FFCC80;
+}
 
 
 button.blue {
     background-color: #42A5F5;
+}
+button.blue:hover, button.blue:disabled {
+    background-color: #90CAF9;
 }
 
 
@@ -88,9 +93,19 @@ button.blue {
 button.pink {
     background-color: #EC407A;
 }
+button.pink:hover, button.pink:disabled {
+    background-color: #F48FB1;
+}
 
 
 
 button.green {
     background-color: #9CCC65;
+}
+button.green:hover, button.green:disabled {
+    background-color: #C5E1A5;
+}
+
+h1 {
+    font-family: "Roboto";
 }
